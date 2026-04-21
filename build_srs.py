@@ -79,7 +79,10 @@ def download_domains(url: str) -> tuple[list[str], list[str], list[str], list[st
             if not line or line.startswith('#'):
                 continue
             
-            line = line.split(' @')[0].strip()
+            # Удаляем комментарии
+            line = line.split(' @')[0].split('#')[0].strip()
+            if not line:
+                continue
             
             if line.startswith('regexp:'):
                 regex_patterns.append(line[7:])
