@@ -20,8 +20,9 @@ jobs:
 
       - name: Install sing-box
         run: |
-          curl -fsSL https://api.github.com/repos/SagerNet/sing-box/releases/latest \
-            | grep -o 'https://.*linux-amd64\.tar\.gz' | head -1 | xargs wget -q -O - | tar xz
+          DOWNLOAD_URL=$(curl -s https://api.github.com/repos/SagerNet/sing-box/releases/latest | grep -o '"browser_download_url": "https://[^"]*linux-amd64\.tar\.gz"' | cut -d'"' -f4)
+          wget -q "$DOWNLOAD_URL" -O sing-box.tar.gz
+          tar xzf sing-box.tar.gz
           sudo mv sing-box /usr/local/bin/
 
       - name: Build SRS files
