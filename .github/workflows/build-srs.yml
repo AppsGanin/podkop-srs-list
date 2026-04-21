@@ -36,24 +36,11 @@ jobs:
       - name: Build SRS files
         run: python3 build_srs.py
 
-      - name: Get current date
-        id: date
-        run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
-
-      - name: Create release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.date.outputs.date }}
-          name: Release ${{ steps.date.outputs.date }}
-          files: SRS/*.srs
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Update latest tag
+      - name: Commit and push SRS files
         run: |
-          git tag -f latest
-          git push origin latest --force
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add SRS/*.srs
+          git commit -m "Update SRS files $(date +%Y-%m-%d)" --allow-empty
+          git push origin main
         continue-on-error: true
