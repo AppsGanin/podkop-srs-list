@@ -1,0 +1,47 @@
+name: Build SRS Ruleset
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install sing-box
+        run: |
+          curl -fsSL https://api.github.com/repos/SagerNet/sing-box/releases/latest \
+            | grep -o 'https://.*linux-amd64\.tar\.gz' | head -1 | xargs wget -q -O - | tar xz
+          sudo mv sing-box /usr/local/bin/
+
+      - name: Build SRS files
+        run: python3 build_srs.py
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Release ${{ github.run_number }}
+          files: SRS/*.srs
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: srs-files
+          path: SRS/
+          retention-days: 7
